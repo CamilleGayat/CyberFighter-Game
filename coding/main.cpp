@@ -80,10 +80,28 @@ int main()
 
     //------------------------------------------------------------------------------------
 
+    // Character 2
+    sf::Texture characterTexture2;
+    if (!characterTexture2.loadFromFile("img/characters/idle/HDD69idle.png")) return 1;
+    sf::Sprite characterSprite2(characterTexture2);
+    characterSprite2.setTextureRect(sf::IntRect(0, 0, 48, 48));
+    int frame2 = 0;
+    sf::Clock clock2;
+
+    //------------------------------------------------------------------------------------
+
     // Character position/size
     characterSprite.setOrigin(48 / 2, 48 / 2);
-    characterSprite.setPosition(window.getSize().x / 5, window.getSize().y / 1.3);
+    characterSprite.setPosition(window.getSize().x / 5, window.getSize().y / 1.35);
     characterSprite.scale(5, 5);
+
+    //------------------------------------------------------------------------------------
+
+    // Character 2 position/size
+
+    characterSprite2.setOrigin(48 / 2, 48 / 2);
+    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.28);
+    characterSprite2.scale(4, 4);
 
     //------------------------------------------------------------------------------------
 
@@ -248,8 +266,15 @@ int main()
                 clock.restart();
             }
 
-            window.draw(characterSprite);
+            if (clock2.getElapsedTime().asSeconds() > 0.15f)
+            {
+                frame2 = (frame2 + 1) % 4;
+                characterSprite2.setTextureRect(sf::IntRect(frame2 * 48, 0, 48, 48));
+                clock2.restart();
+            }
 
+            window.draw(characterSprite);
+            window.draw(characterSprite2);
         }
         window.display();
     }
