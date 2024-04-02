@@ -90,6 +90,51 @@ int main()
 
     //------------------------------------------------------------------------------------
 
+    // Lifebar
+
+    sf::Texture lifebarTexture;
+    if (!lifebarTexture.loadFromFile("img/life/lifebar1.png")) return 1;
+    sf::Sprite lifebarSprite(lifebarTexture);
+    lifebarSprite.setPosition(10, 10); // top-left corner
+    lifebarSprite.setScale(0.06f, 0.06f); // original size
+
+    sf::Text Lifetext;
+    sf::Font lifefont;
+    if (!lifefont.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
+    Lifetext.setFont(lifefont);
+    Lifetext.Bold;
+    Lifetext.setString("100");
+    Lifetext.setCharacterSize(34);
+    Lifetext.setFillColor(sf::Color::White);
+    Lifetext.setPosition(30, 20);
+
+    //------------------------------------------------------------------------------------
+
+    // Lifebar 2
+
+    sf::Texture lifebarTexture2;
+    if (!lifebarTexture2.loadFromFile("img/life/lifebar1.png")) return 1;
+    sf::Sprite lifebarSprite2(lifebarTexture2);
+    float lifebarWidth = lifebarTexture2.getSize().x * 0.06f;
+    lifebarSprite2.setPosition(window.getSize().x - lifebarWidth, 10);
+    lifebarSprite2.setScale(0.06f, 0.06f);
+
+    sf::Text Lifetext2;
+    sf::Font lifefont2;
+    if (!lifefont2.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
+    Lifetext2.setFont(lifefont2);
+    Lifetext2.Bold;
+    Lifetext2.setString("100");
+    Lifetext2.setCharacterSize(34);
+    Lifetext2.setFillColor(sf::Color::White);
+    // Lifetext2.setPosition(100, 20);
+    float lifebarCenter = window.getSize().x - lifebarWidth / 2;
+    float Lifetext2Center = Lifetext2.getGlobalBounds().width / 1.8;
+    Lifetext2.setPosition(lifebarCenter - Lifetext2Center, 20);
+    
+
+    //------------------------------------------------------------------------------------
+
     // Character position/size
     characterSprite.setOrigin(48 / 2, 48 / 2);
     characterSprite.setPosition(window.getSize().x / 5, window.getSize().y / 1.35);
@@ -273,8 +318,16 @@ int main()
                 clock2.restart();
             }
 
+            //------------------------------------------------------------------------------------
+
+            lifebarSprite.setTexture(lifebarTexture);
+            lifebarSprite2.setTexture(lifebarTexture2);
             window.draw(characterSprite);
             window.draw(characterSprite2);
+            window.draw(lifebarSprite);
+            window.draw(lifebarSprite2);
+            window.draw(Lifetext);
+            window.draw(Lifetext2);
         }
         window.display();
     }
