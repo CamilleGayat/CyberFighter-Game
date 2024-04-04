@@ -3,7 +3,6 @@
 
 sf::RenderWindow window(sf::VideoMode(800, 600), "CyberFighter");
 sf::Music menuMusic;
-sf::Music gameplayMusic;
 sf::Clock textClock;
 sf::Texture menuTexture2, menuTexture3;
 sf::Clock menuClock;
@@ -22,15 +21,13 @@ sf::Event event;
 sf::Time animationTime;
 sf::Clock attackClock;
 sf::Clock attackCooldown;
-sf::Time animationTime2;
-sf::Clock attackCooldown2;
-sf::Clock attackClock2;
+sf::Clock countdownClock;
+int countdown = 3;
 int frame = 0;
 int frame2 = 0;
 int animationFrame = 0;
 bool textVisible = true;
 bool Movement = false;
-int lifeValue = 100;
 int lifeValue2 = 100;
 
 
@@ -38,6 +35,7 @@ int lifeValue2 = 100;
 enum GameState
 {
     MainMenu,
+    PreGameplay,
     Gameplay
 };
 
@@ -59,14 +57,7 @@ int main()
     {
         // handle error
     }
-    menuMusic.setLoop(true);
-
-    // Gameplay music
-    if (!gameplayMusic.openFromFile("sounds/battlemusic.wav"))
-    {
-        // handle error
-    }
-    gameplayMusic.setLoop(true);
+    menuMusic.setLoop(true); // to loop the music
 
     //------------------------------------------------------------------------------------
 
@@ -86,6 +77,16 @@ int main()
     pressEnterText.setCharacterSize(24);
     pressEnterText.setFillColor(sf::Color::White);
     pressEnterText.setPosition(window.getSize().x / 2 - 80, window.getSize().y / 1.5);
+
+    //------------------------------------------------------------------------------------
+
+    // Countdown text
+    sf::Clock countdownClock;
+    sf::Text countdownText;
+    countdownText.setFont(font);
+    countdownText.setCharacterSize(70);
+    countdownText.setFillColor(sf::Color::Red);
+    countdownText.setPosition(window.getSize().x / 2 - 20, window.getSize().y / 2);
 
     //------------------------------------------------------------------------------------
 
@@ -161,13 +162,17 @@ int main()
     // Character 2 position/size
 
     characterSprite2.setOrigin(48 / 2, 48 / 2);
-    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.27);
+    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.28);
     characterSprite2.scale(4, 4);
+
 
     //------------------------------------------------------------------------------------
 
     while (window.isOpen())
     {        
+        //------------------------------------------------------------------------------------
+        
+                
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) window.close();
@@ -176,14 +181,15 @@ int main()
 
             if (gameState == MainMenu && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter)
             {
-                gameState = Gameplay; // start the game when enter pressed
+                gameState = PreGameplay; // start the game when enter pressed
+                countdownClock.restart();
             }
 
+        
             //------------------------------------------------------------------------------------
 
             if (gameState == Gameplay)
             {
-                // Bob movement
                 if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
                 {
                     Movement = true;
@@ -193,18 +199,6 @@ int main()
                     Movement = false;
                     characterTexture.loadFromFile("img/characters/idle/bobidle.png");
                 }
-
-                // HDD69 movement
-
-                if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::D))
-                {
-                    Movement = true;
-                }
-                if (event.type == sf::Event::KeyReleased && (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::D))
-                {
-                    Movement = false;
-                    characterTexture2.loadFromFile("img/characters/idle/HDD69idle.png");
-                }
             }
         }
 
@@ -212,6 +206,36 @@ int main()
 
         window.clear();
 
+       if (gameState == PreGameplay)
+        {
+            // Countdown
+            for (int i = 0; i < 3; i++)
+            {  
+
+                // Center the text
+                sf::FloatRect textRect = countdownText.getLocalBounds();
+
+                // Draw the game
+                window.clear();
+                window.draw(spritebackground);
+                window.draw(characterSprite);
+                window.draw(characterSprite2);
+                window.draw(lifebarSprite);
+                window.draw(lifebarSprite2);
+                window.draw(Lifetext);
+                window.draw(Lifetext2);
+                window.draw(countdownText);
+                window.display();
+
+                countdownText.setString(std::to_string(countdown - i));
+                window.draw(countdownText);
+                window.display();
+                sf::sleep(sf::seconds(1.5));
+            }
+        
+            gameState = Gameplay;
+        }
+ 
         //------------------------------------------------------------------------------------
 
         if (gameState == MainMenu)
@@ -222,12 +246,6 @@ int main()
             if (menuMusic.getStatus() != sf::Music::Playing)
             {
                 menuMusic.play();
-            }
-
-            // Gameplay music
-            if (gameplayMusic.getStatus() == sf::Music::Playing)
-            {
-                gameplayMusic.stop();
             }
 
             //------------------------------------------------------------------------------------
@@ -272,68 +290,43 @@ int main()
         {
             //------------------------------------------------------------------------------------
 
-            // Menu music
             if (menuMusic.getStatus() == sf::Music::Playing)
             {
                 menuMusic.stop();
             }
 
-            // Gameplay music
-            if (gameplayMusic.getStatus() != sf::Music::Playing) {
-            gameplayMusic.play();
-            }
-
+            // draw the game
             window.draw(spritebackground);
 
             //------------------------------------------------------------------------------------
         
+            // Movement
             if (Movement)
             {
-
-                // Movement bob
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 {
-                    if (characterSprite.getPosition().x + characterSprite.getGlobalBounds().width < window.getSize().x)
-                    {
-                        characterSprite.move(1, 0);
-                        characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
-                    }
+                    characterSprite.move(1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
                 }
-    
+                
                 else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
                 {
-                    if (characterSprite.getPosition().x > 0)
-                    {
-                        characterSprite.move(-1, 0);
-                        characterTexture.loadFromFile("img/characters/walk/bobwalk2.png");
-                    }
+                    characterSprite.move(-1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk2.png");
                 }
 
-    //------------------------------------------------------------------------------------
+                if (characterSprite.getPosition().x > window.getSize().x)
+                {
+                    characterSprite.setPosition(0, characterSprite.getPosition().y);
+                }
 
-                // Movement HDD69
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-                {
-                    if (characterSprite2.getPosition().x + characterSprite2.getGlobalBounds().width < window.getSize().x)
-                    {
-                        characterSprite2.move(1, 0);
-                        characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
-                    }
-                }
-    
-                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-                {
-                    if (characterSprite2.getPosition().x > 0)
-                    {
-                        characterSprite2.move(-1, 0);
-                        characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
-                    }
-                }
+                //------------------------------------------------------------------------------------
+
             }
 
             //------------------------------------------------------------------------------------
 
-            // Attack Bob
+            // Attack
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             {
@@ -354,36 +347,8 @@ int main()
 
                 if (lifeValue2 <= 0)
                 {
-                    characterTexture2.loadFromFile("img/characters/death/HDD69death.png");
+                    gameState = MainMenu;
                     lifeValue2 = 100;
-                }
-            }
-
-            //------------------------------------------------------------------------------------
-
-            // Attack HDD
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-            {
-                characterTexture2.loadFromFile("img/characters/attack/HDD69attack.png");
-                int frameTime2 = 10.0f;
-                animationTime2 = sf::seconds(frameTime2);
-
-                if (attackClock2.getElapsedTime().asMilliseconds() > animationTime2.asMilliseconds())
-                {
-                    frame2 = (frame2 + 1) % 8;
-                    characterSprite2.setTextureRect(sf::IntRect(frame2 * 48, 0, 48, 48));
-                    attackClock2.restart();
-                }
-
-                lifeValue -=10;
-
-                Lifetext.setString(std::to_string(lifeValue));
-
-                if (lifeValue <= 0)
-                {
-                    characterTexture.loadFromFile("img/characters/death/bobdeath.png");
-                    lifeValue = 100;
                 }
             }
 
