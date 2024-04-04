@@ -1,15 +1,39 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+sf::RenderWindow window(sf::VideoMode(800, 600), "CyberFighter");
+sf::Music menuMusic;
 sf::Clock textClock;
+sf::Texture menuTexture2, menuTexture3;
+sf::Clock menuClock;
+sf::Text pressEnterText;
+sf::Font font;
+sf::Texture backgroundTexture;
+sf::Texture characterTexture;
+sf::Texture characterTexture2;
+sf::Texture lifebarTexture;
+sf::Text Lifetext;
+sf::Font lifefont;
+sf::Texture lifebarTexture2;
+sf::Text Lifetext2;
+sf::Font lifefont2;
+sf::Event event;
+sf::Time animationTime;
+sf::Clock attackClock;
+sf::Clock attackCooldown;
+int frame = 0;
+int frame2 = 0;
+int animationFrame = 0;
 bool textVisible = true;
 bool Movement = false;
+int lifeValue2 = 100;
+
+
 
 enum GameState
 {
     MainMenu,
-    Gameplay,
-    Selecperso
+    Gameplay
 };
 
 
@@ -18,7 +42,6 @@ int main()
     //------------------------------------------------------------------------------------
 
     // Window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "THE D");
     window.setVerticalSyncEnabled(true);
 
     //------------------------------------------------------------------------------------
@@ -27,7 +50,6 @@ int main()
     GameState gameState = MainMenu;
 
     // Menu music
-    sf::Music menuMusic;
     if (!menuMusic.openFromFile("sounds/menumusic.wav"))
     {
         // handle error
@@ -37,21 +59,15 @@ int main()
     //------------------------------------------------------------------------------------
 
     // Menu
-    sf::Texture menuTexture2, menuTexture3;
-    if (!menuTexture2.loadFromFile("img/background/testas2.png")) return 1;
-    if (!menuTexture3.loadFromFile("img/background/testas3.png")) return 1;
+    if (!menuTexture2.loadFromFile("img/background/backgroundmenu2.png")) return 1;
+    if (!menuTexture3.loadFromFile("img/background/backgroundmenu3.png")) return 1;
     sf::Sprite spritemenu(menuTexture2);
     spritemenu.scale(0.5, 0.6);
-
-    sf::Clock menuClock;
-    int animationFrame = 0;
 
     //------------------------------------------------------------------------------------
 
     // Menu text
 
-    sf::Text pressEnterText;
-    sf::Font font;
     if (!font.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
     pressEnterText.setFont(font);
     pressEnterText.setString("Press 'Enter' to start");
@@ -62,7 +78,6 @@ int main()
     //------------------------------------------------------------------------------------
 
     // Background
-    sf::Texture backgroundTexture;
     if (!backgroundTexture.loadFromFile("img/background/cybercity.png")) return 1;
     sf::Sprite spritebackground(backgroundTexture);
     spritebackground.scale(1.17, 2.2);
@@ -71,35 +86,28 @@ int main()
     //------------------------------------------------------------------------------------
 
     // Character
-    sf::Texture characterTexture;
     if (!characterTexture.loadFromFile("img/characters/idle/bobidle.png")) return 1;
     sf::Sprite characterSprite(characterTexture);
     characterSprite.setTextureRect(sf::IntRect(0, 0, 48, 48));
-    int frame = 0;
     sf::Clock clock;
 
     //------------------------------------------------------------------------------------
 
     // Character 2
-    sf::Texture characterTexture2;
     if (!characterTexture2.loadFromFile("img/characters/idle/HDD69idle.png")) return 1;
     sf::Sprite characterSprite2(characterTexture2);
     characterSprite2.setTextureRect(sf::IntRect(0, 0, 48, 48));
-    int frame2 = 0;
     sf::Clock clock2;
 
     //------------------------------------------------------------------------------------
 
     // Lifebar
 
-    sf::Texture lifebarTexture;
     if (!lifebarTexture.loadFromFile("img/life/lifebar1.png")) return 1;
     sf::Sprite lifebarSprite(lifebarTexture);
     lifebarSprite.setPosition(10, 10); // top-left corner
     lifebarSprite.setScale(0.06f, 0.06f); // original size
 
-    sf::Text Lifetext;
-    sf::Font lifefont;
     if (!lifefont.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
     Lifetext.setFont(lifefont);
     Lifetext.Bold;
@@ -112,22 +120,18 @@ int main()
 
     // Lifebar 2
 
-    sf::Texture lifebarTexture2;
     if (!lifebarTexture2.loadFromFile("img/life/lifebar1.png")) return 1;
     sf::Sprite lifebarSprite2(lifebarTexture2);
     float lifebarWidth = lifebarTexture2.getSize().x * 0.06f;
     lifebarSprite2.setPosition(window.getSize().x - lifebarWidth, 10);
     lifebarSprite2.setScale(0.06f, 0.06f);
 
-    sf::Text Lifetext2;
-    sf::Font lifefont2;
     if (!lifefont2.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
     Lifetext2.setFont(lifefont2);
     Lifetext2.Bold;
     Lifetext2.setString("100");
     Lifetext2.setCharacterSize(34);
     Lifetext2.setFillColor(sf::Color::White);
-    // Lifetext2.setPosition(100, 20);
     float lifebarCenter = window.getSize().x - lifebarWidth / 2;
     float Lifetext2Center = Lifetext2.getGlobalBounds().width / 1.8;
     Lifetext2.setPosition(lifebarCenter - Lifetext2Center, 20);
@@ -152,7 +156,6 @@ int main()
 
     while (window.isOpen())
     {        
-        sf::Event event;
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) window.close();
@@ -168,15 +171,14 @@ int main()
 
             if (gameState == Gameplay)
             {
-                if (event.type == sf::Event::KeyPressed && 
-                    (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
+                if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
                 {
                     Movement = true;
                 }
-                if (event.type == sf::Event::KeyReleased && 
-                    (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
+                if (event.type == sf::Event::KeyReleased && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
                 {
                     Movement = false;
+                    characterTexture.loadFromFile("img/characters/idle/bobidle.png");
                 }
             }
         }
@@ -200,9 +202,9 @@ int main()
             //------------------------------------------------------------------------------------
 
             // Menu
-            if (menuClock.getElapsedTime().asSeconds() > 3.0f) // change frame every 0.5 seconds
+            if (menuClock.getElapsedTime().asSeconds() > 3.0f)
             {
-                animationFrame = (animationFrame + 1) % 2; // cycle through 3 frames
+                animationFrame = (animationFrame + 1) % 2;
                 switch (animationFrame)
                 {
                 case 0:
@@ -248,39 +250,34 @@ int main()
             window.draw(spritebackground);
 
             //------------------------------------------------------------------------------------
-
+        
             // Movement
             if (Movement)
             {
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 {
                     characterSprite.move(1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
                 }
                 
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
                 {
                     characterSprite.move(-1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk2.png");
                 }
-
-                characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
 
                 if (characterSprite.getPosition().x > window.getSize().x)
                 {
                     characterSprite.setPosition(0, characterSprite.getPosition().y);
                 }
-            }
 
-            else
-            {
-                characterTexture.loadFromFile("img/characters/idle/bobidle.png");
+                //------------------------------------------------------------------------------------
+
             }
 
             //------------------------------------------------------------------------------------
 
             // Attack
-            sf::Time animationTime;
-            sf::Clock attackClock;
-            sf::Clock attackCooldown;
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             {
@@ -294,11 +291,16 @@ int main()
                     characterSprite.setTextureRect(sf::IntRect(frame * 48, 0, 48, 48));
                     attackClock.restart();
                 }
-            }
 
-            if (attackCooldown.getElapsedTime().asSeconds() > 4.0f)
-            {
-                characterTexture.loadFromFile("img/characters/idle/bobidle.png");
+                lifeValue2 -=10;
+
+                Lifetext2.setString(std::to_string(lifeValue2));
+
+                if (lifeValue2 <= 0)
+                {
+                    gameState = MainMenu;
+                    lifeValue2 = 100;
+                }
             }
 
             //------------------------------------------------------------------------------------

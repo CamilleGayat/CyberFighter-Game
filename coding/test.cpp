@@ -1,42 +1,342 @@
-#include <iostream> // includes the library about input/output management
-#include <stdio.h> // includes libraries from C
-#include <string.h>
-using namespace std; // we use the namespace "std" from the iostream library to be able to use functions from it
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
-class Person{ // I initialize a class
-    const char* gender; // I put some attributes in the class
-    int age;
+sf::RenderWindow window(sf::VideoMode(800, 600), "CyberFighter");
+sf::Music menuMusic;
+sf::Clock textClock;
+sf::Texture menuTexture2, menuTexture3;
+sf::Clock menuClock;
+sf::Text pressEnterText;
+sf::Font font;
+sf::Texture backgroundTexture;
+sf::Texture characterTexture;
+sf::Texture characterTexture2;
+sf::Texture lifebarTexture;
+sf::Text Lifetext;
+sf::Font lifefont;
+sf::Texture lifebarTexture2;
+sf::Text Lifetext2;
+sf::Font lifefont2;
+sf::Event event;
+sf::Time animationTime;
+sf::Clock attackClock;
+sf::Clock attackCooldown;
+int frame = 0;
+int frame2 = 0;
+int animationFrame = 0;
+bool textVisible = true;
+bool Movement = false;
+int lifeValue2 = 100;
 
-    public: // I set the following code block as "public": it can be used by functions outside the class
-    void attribute(const char* gender, int age){ // function to change the attribute of the class, depending on the object's attributes
-        Person::gender = gender; // I change the gender from the class to the gender of the object
-        Person::age = age; // I change the age from the class to the age of the object
+
+
+enum GameState
+{
+    MainMenu,
+    Gameplay
+};
+
+
+int main()
+{
+    //------------------------------------------------------------------------------------
+
+    // Window
+    window.setVerticalSyncEnabled(true);
+
+    //------------------------------------------------------------------------------------
+
+    // Game state
+    GameState gameState = MainMenu;
+
+    // Menu music
+    if (!menuMusic.openFromFile("sounds/menumusic.wav"))
+    {
+        // handle error
     }
-    void displayInfo(){ // function to display the information about the object
-        cout << "This person is a " << gender << "." << endl; // "cout" is like "printf" in C. We basically surround the displayed text by "<<", and put cout and endl to begin the display and end the line (this last one works as an \n in C. You can use \n and \t in C++ btw)
-        if (age <= 0){ 
-            cout << "This person is not even born." << endl;
+    menuMusic.setLoop(true); // to loop the music
+
+    //------------------------------------------------------------------------------------
+
+    // Menu
+    if (!menuTexture2.loadFromFile("img/background/backgroundmenu2.png")) return 1;
+    if (!menuTexture3.loadFromFile("img/background/backgroundmenu3.png")) return 1;
+    sf::Sprite spritemenu(menuTexture2);
+    spritemenu.scale(0.5, 0.6);
+
+    //------------------------------------------------------------------------------------
+
+    // Menu text
+
+    if (!font.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
+    pressEnterText.setFont(font);
+    pressEnterText.setString("Press 'Enter' to start");
+    pressEnterText.setCharacterSize(24);
+    pressEnterText.setFillColor(sf::Color::White);
+    pressEnterText.setPosition(window.getSize().x / 2 - 80, window.getSize().y / 1.5);
+
+    //------------------------------------------------------------------------------------
+
+    // Background
+    if (!backgroundTexture.loadFromFile("img/background/cybercity.png")) return 1;
+    sf::Sprite spritebackground(backgroundTexture);
+    spritebackground.scale(1.17, 2.2);
+
+
+    //------------------------------------------------------------------------------------
+
+    // Character
+    if (!characterTexture.loadFromFile("img/characters/idle/bobidle.png")) return 1;
+    sf::Sprite characterSprite(characterTexture);
+    characterSprite.setTextureRect(sf::IntRect(0, 0, 48, 48));
+    sf::Clock clock;
+
+    //------------------------------------------------------------------------------------
+
+    // Character 2
+    if (!characterTexture2.loadFromFile("img/characters/idle/HDD69idle.png")) return 1;
+    sf::Sprite characterSprite2(characterTexture2);
+    characterSprite2.setTextureRect(sf::IntRect(0, 0, 48, 48));
+    sf::Clock clock2;
+
+    //------------------------------------------------------------------------------------
+
+    // Lifebar
+
+    if (!lifebarTexture.loadFromFile("img/life/lifebar1.png")) return 1;
+    sf::Sprite lifebarSprite(lifebarTexture);
+    lifebarSprite.setPosition(10, 10); // top-left corner
+    lifebarSprite.setScale(0.06f, 0.06f); // original size
+
+    if (!lifefont.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
+    Lifetext.setFont(lifefont);
+    Lifetext.Bold;
+    Lifetext.setString("100");
+    Lifetext.setCharacterSize(34);
+    Lifetext.setFillColor(sf::Color::White);
+    Lifetext.setPosition(30, 20);
+
+    //------------------------------------------------------------------------------------
+
+    // Lifebar 2
+
+    if (!lifebarTexture2.loadFromFile("img/life/lifebar1.png")) return 1;
+    sf::Sprite lifebarSprite2(lifebarTexture2);
+    float lifebarWidth = lifebarTexture2.getSize().x * 0.06f;
+    lifebarSprite2.setPosition(window.getSize().x - lifebarWidth, 10);
+    lifebarSprite2.setScale(0.06f, 0.06f);
+
+    if (!lifefont2.loadFromFile("fonts/pixelletters-font/Pixellettersfull-BnJ5.ttf")) return 1;
+    Lifetext2.setFont(lifefont2);
+    Lifetext2.Bold;
+    Lifetext2.setString("100");
+    Lifetext2.setCharacterSize(34);
+    Lifetext2.setFillColor(sf::Color::White);
+    float lifebarCenter = window.getSize().x - lifebarWidth / 2;
+    float Lifetext2Center = Lifetext2.getGlobalBounds().width / 1.8;
+    Lifetext2.setPosition(lifebarCenter - Lifetext2Center, 20);
+    
+
+    //------------------------------------------------------------------------------------
+
+    // Character position/size
+    characterSprite.setOrigin(48 / 2, 48 / 2);
+    characterSprite.setPosition(window.getSize().x / 5, window.getSize().y / 1.35);
+    characterSprite.scale(5, 5);
+
+    //------------------------------------------------------------------------------------
+
+    // Character 2 position/size
+
+    characterSprite2.setOrigin(48 / 2, 48 / 2);
+    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.28);
+    characterSprite2.scale(4, 4);
+
+    //------------------------------------------------------------------------------------
+
+    while (window.isOpen())
+    {        
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed) window.close();
+
+            // Exit first menu
+
+            if (gameState == MainMenu && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter)
+            {
+                gameState = Gameplay; // start the game when enter pressed
+            }
+
+            //------------------------------------------------------------------------------------
+
+            if (gameState == Gameplay)
+            {
+                if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
+                {
+                    Movement = true;
+                }
+                if (event.type == sf::Event::KeyReleased && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
+                {
+                    Movement = false;
+                }
+            }
         }
-        else{
-            cout << "This person is " << age << " years old." << endl;
+
+        //------------------------------------------------------------------------------------
+
+        window.clear();
+
+        //------------------------------------------------------------------------------------
+
+        if (gameState == MainMenu)
+        {
+            //------------------------------------------------------------------------------------
+
+            // Menu music
+            if (menuMusic.getStatus() != sf::Music::Playing)
+            {
+                menuMusic.play();
+            }
+
+            //------------------------------------------------------------------------------------
+
+            // Menu
+            if (menuClock.getElapsedTime().asSeconds() > 3.0f)
+            {
+                animationFrame = (animationFrame + 1) % 2;
+                switch (animationFrame)
+                {
+                case 0:
+                    spritemenu.setTexture(menuTexture2);
+                    break;
+                case 1:
+                    spritemenu.setTexture(menuTexture3);
+                    break;
+                }
+                menuClock.restart();
+            }
+
+            //------------------------------------------------------------------------------------
+
+            // Menu enterText
+            window.draw(spritemenu);
+
+            if (textClock.getElapsedTime().asSeconds() > 0.5f)
+            {
+                textVisible = !textVisible;
+                textClock.restart();
+            }
+
+            if (textVisible)
+            {
+                window.draw(pressEnterText);
+            }
+
+            //------------------------------------------------------------------------------------
+            
         }
+
+        else if (gameState == Gameplay)
+        {
+            //------------------------------------------------------------------------------------
+
+            if (menuMusic.getStatus() == sf::Music::Playing)
+            {
+                menuMusic.stop();
+            }
+
+            // draw the game
+            window.draw(spritebackground);
+
+            //------------------------------------------------------------------------------------
+        
+            // Movement
+            if (Movement)
+            {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+                {
+                    characterSprite.move(1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
+                }
+                
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+                {
+                    characterSprite.move(-1, 0);
+                    characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
+                }
+
+                else
+                {
+                    characterTexture.loadFromFile("img/characters/idle/bobidle.png");
+                }
+
+                if (characterSprite.getPosition().x > window.getSize().x)
+                {
+                    characterSprite.setPosition(0, characterSprite.getPosition().y);
+                }
+
+                //------------------------------------------------------------------------------------
+
+            }
+
+            //------------------------------------------------------------------------------------
+
+            // Attack
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+            {
+                characterTexture.loadFromFile("img/characters/attack/bobattack.png");
+                int frameTime = 10.0f;
+                animationTime = sf::seconds(frameTime);
+
+                if (attackClock.getElapsedTime().asMilliseconds() > animationTime.asMilliseconds())
+                {
+                    frame = (frame + 1) % 6;
+                    characterSprite.setTextureRect(sf::IntRect(frame * 48, 0, 48, 48));
+                    attackClock.restart();
+                }
+
+                lifeValue2 -=10;
+
+                Lifetext2.setString(std::to_string(lifeValue2));
+
+                if (lifeValue2 <= 0)
+                {
+                    gameState = MainMenu;
+                    lifeValue2 = 100;
+                }
+            }
+
+            //------------------------------------------------------------------------------------
+
+            // Frame clock
+            if (clock.getElapsedTime().asSeconds() > 0.15f)
+            {
+                frame = (frame + 1) % 4;
+                characterSprite.setTextureRect(sf::IntRect(frame * 48, 0, 48, 48));
+                clock.restart();
+            }
+
+            if (clock2.getElapsedTime().asSeconds() > 0.15f)
+            {
+                frame2 = (frame2 + 1) % 4;
+                characterSprite2.setTextureRect(sf::IntRect(frame2 * 48, 0, 48, 48));
+                clock2.restart();
+            }
+
+            //------------------------------------------------------------------------------------
+
+            lifebarSprite.setTexture(lifebarTexture);
+            lifebarSprite2.setTexture(lifebarTexture2);
+            window.draw(characterSprite);
+            window.draw(characterSprite2);
+            window.draw(lifebarSprite);
+            window.draw(lifebarSprite2);
+            window.draw(Lifetext);
+            window.draw(Lifetext2);
+        }
+        window.display();
     }
-}; // do not forget the semicolon after a class :)
 
-void inputGender(char gender[10], int &age){ // function to ask the gender and the age to the user
-    cout << "What is your gender, or whatever you are? ";
-    cin >> gender; // "cin" is like "getchar" in C. We basically ask o the user a input, and we store the input into a variable (here, the variable gender) with the symbol ">>"
-    cout << "What is your age? ";
-    cin >> age;
-}
-
-
-int main(){ // the main function, like in C
-    Person MyPerson; // we initialize a class named "MyPerson", following the structure of the class "Person"
-    char gender[10];
-    int age;
-    inputGender(gender, age); // we call the function to obtain the input information
-    MyPerson.attribute(gender, age); // we call the function which is within the class "Person", but with the name we gave it (here, the class "MyPerson")
-    MyPerson.displayInfo();
     return 0;
 }
