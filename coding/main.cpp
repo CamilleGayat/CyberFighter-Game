@@ -3,6 +3,7 @@
 
 sf::RenderWindow window(sf::VideoMode(800, 600), "CyberFighter");
 sf::Music menuMusic;
+sf::Music gameplayMusic;
 sf::Clock textClock;
 sf::Texture menuTexture2, menuTexture3;
 sf::Clock menuClock;
@@ -58,7 +59,14 @@ int main()
     {
         // handle error
     }
-    menuMusic.setLoop(true); // to loop the music
+    menuMusic.setLoop(true);
+
+    // Gameplay music
+    if (!gameplayMusic.openFromFile("sounds/battlemusic.wav"))
+    {
+        // handle error
+    }
+    gameplayMusic.setLoop(true);
 
     //------------------------------------------------------------------------------------
 
@@ -216,6 +224,12 @@ int main()
                 menuMusic.play();
             }
 
+            // Gameplay music
+            if (gameplayMusic.getStatus() == sf::Music::Playing)
+            {
+                gameplayMusic.stop();
+            }
+
             //------------------------------------------------------------------------------------
 
             // Menu
@@ -258,55 +272,63 @@ int main()
         {
             //------------------------------------------------------------------------------------
 
+            // Menu music
             if (menuMusic.getStatus() == sf::Music::Playing)
             {
                 menuMusic.stop();
             }
 
-            // draw the game
+            // Gameplay music
+            if (gameplayMusic.getStatus() != sf::Music::Playing) {
+            gameplayMusic.play();
+            }
+
             window.draw(spritebackground);
 
             //------------------------------------------------------------------------------------
         
-            // Movement
             if (Movement)
             {
+
+                // Movement bob
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 {
-                    characterSprite.move(1, 0);
-                    characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
+                    if (characterSprite.getPosition().x + characterSprite.getGlobalBounds().width < window.getSize().x)
+                    {
+                        characterSprite.move(1, 0);
+                        characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
+                    }
                 }
-                
+    
                 else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
                 {
-                    characterSprite.move(-1, 0);
-                    characterTexture.loadFromFile("img/characters/walk/bobwalk2.png");
+                    if (characterSprite.getPosition().x > 0)
+                    {
+                        characterSprite.move(-1, 0);
+                        characterTexture.loadFromFile("img/characters/walk/bobwalk2.png");
+                    }
                 }
 
-                if (characterSprite.getPosition().x > window.getSize().x)
-                {
-                    characterSprite.setPosition(0, characterSprite.getPosition().y);
-                }
+    //------------------------------------------------------------------------------------
 
-                //------------------------------------------------------------------------------------
-
+                // Movement HDD69
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
                 {
-                    characterSprite2.move(1, 0);
-                    characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                    if (characterSprite2.getPosition().x + characterSprite2.getGlobalBounds().width < window.getSize().x)
+                    {
+                        characterSprite2.move(1, 0);
+                        characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                    }
                 }
-                
+    
                 else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
                 {
-                    characterSprite2.move(-1, 0);
-                    characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                    if (characterSprite2.getPosition().x > 0)
+                    {
+                        characterSprite2.move(-1, 0);
+                        characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                    }
                 }
-
-                if (characterSprite2.getPosition().x > window.getSize().x)
-                {
-                    characterSprite2.setPosition(0, characterSprite2.getPosition().y);
-                }
-
             }
 
             //------------------------------------------------------------------------------------
