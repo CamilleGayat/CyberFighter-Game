@@ -21,11 +21,15 @@ sf::Event event;
 sf::Time animationTime;
 sf::Clock attackClock;
 sf::Clock attackCooldown;
+sf::Time animationTime2;
+sf::Clock attackCooldown2;
+sf::Clock attackClock2;
 int frame = 0;
 int frame2 = 0;
 int animationFrame = 0;
 bool textVisible = true;
 bool Movement = false;
+int lifeValue = 100;
 int lifeValue2 = 100;
 
 
@@ -149,7 +153,7 @@ int main()
     // Character 2 position/size
 
     characterSprite2.setOrigin(48 / 2, 48 / 2);
-    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.28);
+    characterSprite2.setPosition(window.getSize().x / 1.2, window.getSize().y / 1.27);
     characterSprite2.scale(4, 4);
 
     //------------------------------------------------------------------------------------
@@ -171,6 +175,7 @@ int main()
 
             if (gameState == Gameplay)
             {
+                // Bob movement
                 if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::Left))
                 {
                     Movement = true;
@@ -179,6 +184,18 @@ int main()
                 {
                     Movement = false;
                     characterTexture.loadFromFile("img/characters/idle/bobidle.png");
+                }
+
+                // HDD69 movement
+
+                if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::D))
+                {
+                    Movement = true;
+                }
+                if (event.type == sf::Event::KeyReleased && (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::D))
+                {
+                    Movement = false;
+                    characterTexture2.loadFromFile("img/characters/idle/HDD69idle.png");
                 }
             }
         }
@@ -273,11 +290,28 @@ int main()
 
                 //------------------------------------------------------------------------------------
 
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+                {
+                    characterSprite2.move(1, 0);
+                    characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                }
+                
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+                {
+                    characterSprite2.move(-1, 0);
+                    characterTexture2.loadFromFile("img/characters/walk/HDD69walk.png");
+                }
+
+                if (characterSprite2.getPosition().x > window.getSize().x)
+                {
+                    characterSprite2.setPosition(0, characterSprite2.getPosition().y);
+                }
+
             }
 
             //------------------------------------------------------------------------------------
 
-            // Attack
+            // Attack Bob
 
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             {
@@ -298,8 +332,36 @@ int main()
 
                 if (lifeValue2 <= 0)
                 {
-                    gameState = MainMenu;
+                    characterTexture2.loadFromFile("img/characters/death/HDD69death.png");
                     lifeValue2 = 100;
+                }
+            }
+
+            //------------------------------------------------------------------------------------
+
+            // Attack HDD
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+            {
+                characterTexture2.loadFromFile("img/characters/attack/HDD69attack.png");
+                int frameTime2 = 10.0f;
+                animationTime2 = sf::seconds(frameTime2);
+
+                if (attackClock2.getElapsedTime().asMilliseconds() > animationTime2.asMilliseconds())
+                {
+                    frame2 = (frame2 + 1) % 8;
+                    characterSprite2.setTextureRect(sf::IntRect(frame2 * 48, 0, 48, 48));
+                    attackClock2.restart();
+                }
+
+                lifeValue -=10;
+
+                Lifetext.setString(std::to_string(lifeValue));
+
+                if (lifeValue <= 0)
+                {
+                    characterTexture.loadFromFile("img/characters/death/bobdeath.png");
+                    lifeValue = 100;
                 }
             }
 
