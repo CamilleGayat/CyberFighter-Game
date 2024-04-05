@@ -28,6 +28,7 @@ sf::Clock attackClock2;
 
 int frame = 0;
 int frame2 = 0;
+int countdown = 3;
 int animationFrame = 0;
 bool textVisible = true;
 bool Movement = false;
@@ -94,6 +95,15 @@ int main()
     pressEnterText.setCharacterSize(24);
     pressEnterText.setFillColor(sf::Color::White);
     pressEnterText.setPosition(window.getSize().x / 2 - 80, window.getSize().y / 1.5);
+
+
+        // Countdown text
+    sf::Clock countdownClock;
+    sf::Text countdownText;
+    countdownText.setFont(font);
+    countdownText.setCharacterSize(70);
+    countdownText.setFillColor(sf::Color::White);
+    countdownText.setPosition(window.getSize().x / 2 - 20, window.getSize().y / 2);
 
     //------------------------------------------------------------------------------------
 
@@ -185,7 +195,7 @@ int main()
 
             if (gameState == MainMenu && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter)
             {
-                gameState = Gameplay; // start the game when enter pressed
+                gameState = PreGameplay; // start the game when enter pressed
             }
 
         
@@ -276,6 +286,43 @@ int main()
 
             //------------------------------------------------------------------------------------
             
+        }
+
+        
+       if (gameState == PreGameplay)
+        {
+            // Countdown
+            for (int i = 0; i < 3; i++)
+            {  
+
+
+                countdownText.setString(std::to_string(countdown - i));
+
+                // Center the text
+                sf::FloatRect textRect = countdownText.getLocalBounds();
+                sf::RectangleShape highlight(sf::Vector2f(countdownText.getGlobalBounds().width + 10, countdownText.getGlobalBounds().height + 10));
+                highlight.setFillColor(sf::Color(255, 0, 0, 255)); 
+                highlight.setPosition(countdownText.getPosition().x -5, (countdownText.getPosition().y + countdownText.getGlobalBounds().height) - 5);
+
+                // Draw the game
+                window.clear();
+                window.draw(spritebackground);
+                window.draw(characterSprite);
+                window.draw(characterSprite2);
+                window.draw(lifebarSprite);
+                window.draw(lifebarSprite2);
+                window.draw(Lifetext);
+                window.draw(Lifetext2);
+                window.draw(highlight);
+                window.draw(countdownText);
+                window.display();
+                window.draw(countdownText);
+                window.display();
+
+                sf::sleep(sf::seconds(1.3));
+            }
+        
+            gameState = Gameplay;
         }
 
         else if (gameState == Gameplay)
