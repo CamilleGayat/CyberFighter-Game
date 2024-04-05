@@ -85,7 +85,7 @@ int main()
     sf::Text countdownText;
     countdownText.setFont(font);
     countdownText.setCharacterSize(70);
-    countdownText.setFillColor(sf::Color::White);
+    countdownText.setFillColor(sf::Color::Red);
     countdownText.setPosition(window.getSize().x / 2 - 20, window.getSize().y / 2);
 
     //------------------------------------------------------------------------------------
@@ -211,13 +211,9 @@ int main()
             // Countdown
             for (int i = 0; i < 3; i++)
             {  
-                countdownText.setString(std::to_string(countdown - i));
 
                 // Center the text
                 sf::FloatRect textRect = countdownText.getLocalBounds();
-                sf::RectangleShape highlight(sf::Vector2f(countdownText.getGlobalBounds().width + 10, countdownText.getGlobalBounds().height + 10));
-                highlight.setFillColor(sf::Color(255, 0, 0, 255)); 
-                highlight.setPosition(countdownText.getPosition().x -5, (countdownText.getPosition().y + countdownText.getGlobalBounds().height) - 5);
 
                 // Draw the game
                 window.clear();
@@ -228,13 +224,13 @@ int main()
                 window.draw(lifebarSprite2);
                 window.draw(Lifetext);
                 window.draw(Lifetext2);
-                window.draw(highlight);
-                window.draw(countdownText);
-                window.display();
                 window.draw(countdownText);
                 window.display();
 
-                sf::sleep(sf::seconds(1.3));
+                countdownText.setString(std::to_string(countdown - i));
+                window.draw(countdownText);
+                window.display();
+                sf::sleep(sf::seconds(1.5));
             }
         
             gameState = Gameplay;
