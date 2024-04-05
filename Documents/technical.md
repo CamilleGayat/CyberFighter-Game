@@ -64,7 +64,7 @@
 
 #### 8. User Interface Design
 - **UI Elements**:
-  - Main menu with buttons for character selelction
+  - Main menu with buttons for character selection
   - In-game HUD displaying HP bars and other relevant information.
 
 #### 9. Development Environment

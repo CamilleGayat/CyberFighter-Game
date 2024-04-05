@@ -25,6 +25,7 @@ sf::Clock attackCooldown;
 sf::Time animationTime2;
 sf::Clock attackCooldown2;
 sf::Clock attackClock2;
+
 int frame = 0;
 int frame2 = 0;
 int animationFrame = 0;
@@ -33,13 +34,20 @@ bool Movement = false;
 int lifeValue = 100;
 int lifeValue2 = 100;
 
+float characterPosX = window.getSize().x / 5;
+float character2PosX = window.getSize().x / 1.2;
+float characterPosY = window.getSize().y / 1.34;
+float character2PosY = window.getSize().y / 1.27;
+
 
 
 enum GameState
 {
     MainMenu,
+    PreGameplay,
     Gameplay
 };
+
 
 
 int main()
@@ -153,7 +161,7 @@ int main()
 
     // Character position/size
     characterSprite.setOrigin(48 / 2, 48 / 2);
-    characterSprite.setPosition(window.getSize().x / 5, window.getSize().y / 1.35);
+    characterSprite.setPosition(characterPosX, characterPosY);
     characterSprite.scale(5, 5);
 
     //------------------------------------------------------------------------------------
@@ -168,6 +176,7 @@ int main()
 
     while (window.isOpen())
     {        
+        //------------------------------------------------------------------------------------
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) window.close();
@@ -179,6 +188,7 @@ int main()
                 gameState = Gameplay; // start the game when enter pressed
             }
 
+        
             //------------------------------------------------------------------------------------
 
             if (gameState == Gameplay)
@@ -211,7 +221,7 @@ int main()
         //------------------------------------------------------------------------------------
 
         window.clear();
-
+ 
         //------------------------------------------------------------------------------------
 
         if (gameState == MainMenu)
@@ -279,18 +289,21 @@ int main()
             }
 
             // Gameplay music
-            if (gameplayMusic.getStatus() != sf::Music::Playing) {
-            gameplayMusic.play();
+            if (gameplayMusic.getStatus() != sf::Music::Playing)
+            {
+                gameplayMusic.play();
             }
+
+            //------------------------------------------------------------------------------------
 
             window.draw(spritebackground);
 
             //------------------------------------------------------------------------------------
         
+            // Movement
             if (Movement)
             {
-
-                // Movement bob
+                // Movement Bob
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
                 {
                     if (characterSprite.getPosition().x + characterSprite.getGlobalBounds().width < window.getSize().x)
@@ -299,7 +312,7 @@ int main()
                         characterTexture.loadFromFile("img/characters/walk/bobwalk.png");
                     }
                 }
-    
+                
                 else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
                 {
                     if (characterSprite.getPosition().x > 0)
@@ -347,11 +360,8 @@ int main()
                     characterSprite.setTextureRect(sf::IntRect(frame * 48, 0, 48, 48));
                     attackClock.restart();
                 }
-
                 lifeValue2 -=10;
-
                 Lifetext2.setString(std::to_string(lifeValue2));
-
                 if (lifeValue2 <= 0)
                 {
                     characterTexture2.loadFromFile("img/characters/death/HDD69death.png");
@@ -377,9 +387,7 @@ int main()
                 }
 
                 lifeValue -=10;
-
                 Lifetext.setString(std::to_string(lifeValue));
-
                 if (lifeValue <= 0)
                 {
                     characterTexture.loadFromFile("img/characters/death/bobdeath.png");
